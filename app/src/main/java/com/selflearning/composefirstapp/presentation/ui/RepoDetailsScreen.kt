@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -110,16 +111,18 @@ fun RepoDetailsScreen(
                                         Text(
                                             text = "Project Link: ",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            modifier = Modifier.weight(1f) // Weight to push link to the right
+                                            modifier = Modifier.weight(1f)
                                         )
                                         Text(
                                             text = repo.html_url,
                                             modifier = Modifier
                                                 .clickable {
                                                     navController.navigate("webview/${Uri.encode(repo.html_url)}")
-                                                },
+                                                }
+                                                .widthIn(max = 200.dp), // Limit max width to allow wrapping
                                             color = Color.Blue,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            softWrap = true // Ensure soft wrap is enabled (default behavior)
                                         )
                                     }
                                 }

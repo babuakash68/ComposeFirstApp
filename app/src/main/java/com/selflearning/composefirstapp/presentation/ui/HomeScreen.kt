@@ -42,7 +42,10 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
         topBar = {
             TopAppBar(
                 title = { Text("GitHub Repository") },
-                colors = TopAppBarDefaults.smallTopAppBarColors()
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White
+                )
             )
         }
     ) { paddingValues ->
