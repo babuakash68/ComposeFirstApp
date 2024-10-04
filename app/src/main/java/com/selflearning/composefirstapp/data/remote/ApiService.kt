@@ -10,9 +10,8 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    // Get a list of repositories for a specific user
-    @GET("users/{username}/repos")
-    suspend fun getUserRepositories(@Path("username") username: String): Response<List<Repository>>
+    @GET("repositories")
+    suspend fun fetchAllRepositories(): Response<List<Repository>>
 
     // Get details for a specific repository
     @GET("repos/{owner}/{repo}")

@@ -6,8 +6,8 @@ import retrofit2.Response
 
 class GitHubRepository(private val apiService: ApiService) {
 
-    suspend fun getUserRepositories(username: String): Response<List<Repository>> {
-        return apiService.getUserRepositories(username)
+    suspend fun getUserRepositories(): Response<List<Repository>> {
+        return apiService.fetchAllRepositories()
     }
 
     // Fetch repository details from GitHub API

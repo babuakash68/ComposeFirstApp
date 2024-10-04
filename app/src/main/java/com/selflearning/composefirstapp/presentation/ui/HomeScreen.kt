@@ -61,7 +61,7 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
                 Button(
                     onClick = {
                         searchQuery = ""
-                        viewModel.fetchUserRepositories(userName)
+                        viewModel.fetchUserRepositories()
                     }
                 ) {
                     Text("Show All Repositories")
@@ -76,7 +76,7 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
                     items(repositories) { repository ->
                         RepositoryCard(repository) {
                             // Navigate to RepoDetailsScreen with repository name
-                            navController.navigate("repoDetails/${repository.name}")
+                            navController.navigate("repoDetails/${repository.name}/${repository.owner.login}")
                         }
                     }
                 }

@@ -17,10 +17,10 @@ class MainViewModel(private val repository: GitHubRepository) : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
-    fun fetchUserRepositories(username: String) {
+    fun fetchUserRepositories() {
         viewModelScope.launch {
             _isLoading.value = true
-            val response = repository.getUserRepositories(username)
+            val response = repository.getUserRepositories()
             _isLoading.value = false
 
             if (response.isSuccessful) {

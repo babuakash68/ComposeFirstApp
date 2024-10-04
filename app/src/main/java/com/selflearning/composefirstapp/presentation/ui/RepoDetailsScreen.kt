@@ -1,15 +1,18 @@
 package com.selflearning.composefirstapp.presentation.ui
 
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,11 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.selflearning.composefirstapp.R
 import com.selflearning.composefirstapp.data.remote.models.Contributor
 import com.selflearning.composefirstapp.presentation.viewmodels.MainViewModel
@@ -75,29 +80,51 @@ fun RepoDetailsScreen(
                             .padding(16.dp)
                     ) {
                         repoDetails?.let { repo ->
-                            Text(
-                                text = repo.name,
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                            Text(
-                                text = repo.description ?: "No description",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            Text(
-                                text = "Project Link: ${repo.html_url}",
-                                modifier = Modifier
-                                    .clickable {
-                                        navController.navigate("webview/${Uri.encode(repo.html_url)}")
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Image(
+                                    painter = rememberImagePainter(repo.owner.avatar_url),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(60.dp) // Adjust the size as needed
+                                        .padding(end = 15.dp)
+                                        .align(Alignment.CenterVertically),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Column {
+                                    Text(
+                                        text = repo.name,
+                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        text = repo.description ?: "No description",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(bottom = 16.dp).fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "Project Link: ",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.weight(1f) // Weight to push link to the right
+                                        )
+                                        Text(
+                                            text = repo.html_url,
+                                            modifier = Modifier
+                                                .clickable {
+                                                    navController.navigate("webview/${Uri.encode(repo.html_url)}")
+                                                },
+                                            color = Color.Blue,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
                                     }
-                                    .padding(bottom = 16.dp),
-                                color = Color.Blue,
-                                style = MaterialTheme.typography.bodyMedium
+                                }
+                            }
 
-                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -112,7 +139,7 @@ fun RepoDetailsScreen(
                         } else {
                             Text(
                                 text = "Contributors List",
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleLarge
                             )
                             LazyColumn {
                                 items(contributors.size) { index ->
