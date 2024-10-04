@@ -2,6 +2,7 @@ package com.selflearning.composefirstapp.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.selflearning.composefirstapp.data.remote.models.Contributor
 import com.selflearning.composefirstapp.data.repositories.GitHubRepository
 import com.selflearning.composefirstapp.data.remote.models.Repository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,5 +39,27 @@ class MainViewModel(private val repository: GitHubRepository) : ViewModel() {
             _isLoading.value = false // Set loading state to false
             _repositories.value = result
         }
+    }
+
+    fun getRepositoryDetails(repoName: String, owner: String): StateFlow<Repository?> {
+        val repositoryDetails = MutableStateFlow<Repository?>(null)
+        viewModelScope.launch {
+            val response = repository.getRepositoryDetails(owner,repoName)
+            if (response.isSuccessful) {
+                repositoryDetails.value = response.body()
+            }
+        }
+        return repositoryDetails
+    }
+
+    fun getContributors(repoName: String, owner: String): StateFlow<List<Contributor>> {
+        val contributors = MutableStateFlow<List<Contributor>>(emptyList())
+        viewModelScope.launch {
+            val response = repository.getContributors(repoName,owner)
+            if (response.isSuccessful) {
+                contributors.value = response.body() ?: emptyList()
+            }
+        }
+        return contributors
     }
 }
