@@ -1,10 +1,13 @@
 package com.selflearning.composefirstapp.presentation.ui
 
+import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,9 +23,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.selflearning.composefirstapp.R
 import com.selflearning.composefirstapp.data.remote.models.Contributor
 import com.selflearning.composefirstapp.presentation.viewmodels.MainViewModel
 
@@ -67,23 +75,49 @@ fun RepoDetailsScreen(
                             .padding(16.dp)
                     ) {
                         repoDetails?.let { repo ->
-                            Text(text = "Name: ${repo.name}")
-                            Text(text = "Description: ${repo.description ?: "No description"}")
+                            Text(
+                                text = repo.name,
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                text = repo.description ?: "No description",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
                             Text(
                                 text = "Project Link: ${repo.html_url}",
-                                modifier = Modifier.clickable {
-                                    // Handle project link click
-                                },
-                                color = Color.Blue
+                                modifier = Modifier
+                                    .clickable {
+                                        navController.navigate("webview/${Uri.encode(repo.html_url)}")
+                                    }
+                                    .padding(bottom = 16.dp),
+                                color = Color.Blue,
+                                style = MaterialTheme.typography.bodyMedium
+
                             )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(text = "Contributors", style = MaterialTheme.typography.titleMedium)
-                        LazyColumn {
-                            items(contributors.size) { index ->
-                                ContributorCard(contributors[index])
+                        if (contributors.isEmpty()) {
+                            Text(
+                                text = "No contributors available",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(vertical = 16.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "Contributors List",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            LazyColumn {
+                                items(contributors.size) { index ->
+                                    ContributorCard(contributors[index])
+                                }
                             }
                         }
                     }
@@ -93,9 +127,25 @@ fun RepoDetailsScreen(
     )
 }
 
+
 @Composable
 fun ContributorCard(contributor: Contributor) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = contributor.username, style = MaterialTheme.typography.bodyLarge)
+    Box(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+            .background(
+                color = colorResource(id = R.color.light_blue),
+                shape = MaterialTheme.shapes.small
+            )
+            .padding(16.dp)
+    ) {
+        Text(
+            text = contributor.username,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colorResource(id = R.color.dark_blue)
+        )
     }
 }
+
+

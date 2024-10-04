@@ -20,6 +20,7 @@ import com.selflearning.composefirstapp.data.remote.GitHubApiClient // Import th
 import com.selflearning.composefirstapp.data.repositories.GitHubRepository
 import com.selflearning.composefirstapp.presentation.viewmodels.MainViewModel
 import com.selflearning.composefirstapp.data.remote.models.Repository
+import com.selflearning.composefirstapp.presentation.utils.WebViewScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
@@ -44,6 +45,10 @@ class MainActivity : ComponentActivity() {
                 composable("repoDetails/{repoName}") { backStackEntry ->
                     val repoName = backStackEntry.arguments?.getString("repoName")
                     RepoDetailsScreen(navController, repoName ?: "","android",viewModel)
+                }
+                composable("webview/{url}") { backStackEntry ->
+                    val url = backStackEntry.arguments?.getString("url") ?: ""
+                    WebViewScreen(url, navController)
                 }
             }
         }

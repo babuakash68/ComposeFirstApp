@@ -95,5 +95,4 @@ dependencies {
 //Navigation dependency
     implementation(libs.navigation.compose)
 
-
 }
