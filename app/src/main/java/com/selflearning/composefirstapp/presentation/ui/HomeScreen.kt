@@ -36,7 +36,7 @@ import androidx.navigation.NavHostController
 fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userName: String) {
     var searchQuery by remember { mutableStateOf("") }
     val repositories by viewModel.repositories.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState() // Observe loading state
+    val isLoading by viewModel.isLoading.collectAsState()
 
     Scaffold(
         topBar = {
