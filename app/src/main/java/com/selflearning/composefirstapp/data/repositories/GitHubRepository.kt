@@ -25,4 +25,7 @@ class GitHubRepository(private val apiService: ApiService) {
         }
         return emptyList()
     }
+
+    suspend fun getContributors(repoName: String, owner: String) =
+        apiService.getContributors(owner,repoName)
 }

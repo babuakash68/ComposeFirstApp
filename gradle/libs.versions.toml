@@ -38,6 +38,9 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version = "2.6.1" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.7.3" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.7.3" }
 
+# Add navigation compose dependency
+navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.8.2" }
+
 # Coil
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version = "2.2.2" }
 
