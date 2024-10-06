@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("kapt")
+
 }
 
 android {
@@ -50,7 +52,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -71,19 +72,18 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
 
-// Room dependencies
+    // Room dependencies
     implementation(libs.room.runtime)
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
     implementation(libs.room.ktx)
-
+    kapt(libs.room.compiler)
     // Coroutines dependencies
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
-// Coil for image loading
+    // Coil for image loading
     implementation(libs.coil.compose)
 
-// Test dependencies
+    // Test dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -92,7 +92,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-//Navigation dependency
+    // Navigation dependency
     implementation(libs.navigation.compose)
-
 }

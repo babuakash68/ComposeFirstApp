@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,11 +51,15 @@ fun RepoDetailsScreen(
 ) {
     val viewModel: MainViewModel = viewModel
 
-    val repoDetails by viewModel.getRepositoryDetails(repoName, owner)
-        .collectAsState(initial = null)
-    val contributors by viewModel.getContributors(repoName, owner)
-        .collectAsState(initial = emptyList())
+    LaunchedEffect(repoName, owner) {
+        viewModel.getRepositoryDetails(repoName, owner)
+        viewModel.getContributors(repoName, owner)
+    }
+
+    val repoDetails by viewModel.repositoryDetails.collectAsState()
+    val contributors by viewModel.contributors.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
 
     Scaffold(
         topBar = {
@@ -119,7 +124,7 @@ fun RepoDetailsScreen(
                                                 .clickable {
                                                     navController.navigate("webview/${Uri.encode(repo.html_url)}")
                                                 }
-                                                .widthIn(max = 200.dp), // Limit max width to allow wrapping
+                                                .widthIn(max = 200.dp),
                                             color = Color.Blue,
                                             style = MaterialTheme.typography.bodyMedium,
                                             softWrap = true // Ensure soft wrap is enabled (default behavior)
