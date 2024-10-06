@@ -8,8 +8,7 @@ import okhttp3.Request
 
 object GitHubApiClient {
     private const val BASE_URL = "https://api.github.com/"
-    private const val TOKEN = "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"
-
+    private const val TOKEN = "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"
     private val client = OkHttpClient.Builder()
         .addInterceptor { chain ->
             val originalRequest: Request = chain.request()
