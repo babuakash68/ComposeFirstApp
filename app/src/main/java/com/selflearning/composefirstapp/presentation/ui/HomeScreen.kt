@@ -1,42 +1,47 @@
 package com.selflearning.composefirstapp.presentation.ui
 
+import android.content.Context
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.selflearning.composefirstapp.data.remote.models.Repository
-import com.selflearning.composefirstapp.presentation.viewmodels.MainViewModel
-
-import androidx.compose.material3.*
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
+import com.selflearning.composefirstapp.data.remote.models.Repository
+import com.selflearning.composefirstapp.presentation.utils.NetworkUtils
+import com.selflearning.composefirstapp.presentation.viewmodels.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userName: String) {
+fun HomeScreen(
+    navController: NavHostController,
+    viewModel: MainViewModel,
+    userName: String,
+    networkUtils: NetworkUtils
+) {
     var searchQuery by remember { mutableStateOf("") }
     val repositories by viewModel.repositories.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val context = LocalContext.current
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.size
+        }.collect { visibleItemsCount ->
+            if (visibleItemsCount >= repositories.size && !isLoading && searchQuery.isNotEmpty()) {
+                viewModel.searchRepositories(searchQuery)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -49,7 +54,11 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -57,20 +66,32 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
                 modifier = Modifier.fillMaxWidth()
             )
             Row(modifier = Modifier.padding(top = 8.dp)) {
-                Button(onClick = { viewModel.searchRepositories(searchQuery, 1) }) {
+                Button(onClick = {
+
+                    if (networkUtils.isNetworkAvailable()) {
+                        viewModel.searchRepositories(searchQuery)
+                        viewModel.resetSearch()
+                    } else {
+                        networkUtils.showNetworkAlertDialog(context)
+                    }
+                }) {
                     Text("Search")
                 }
-                Spacer(modifier = Modifier.width(8.dp)) // Add space between buttons
+                Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = {
-                        searchQuery = ""
-                        viewModel.fetchUserRepositories()
+                        if (networkUtils.isNetworkAvailable()) {
+                            searchQuery = ""
+                            viewModel.resetSearch()
+                            viewModel.fetchUserRepositories()
+                        } else {
+                            networkUtils.showNetworkAlertDialog(context)
+                        }
                     }
                 ) {
                     Text("Show All Repositories")
                 }
             }
-
 
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
@@ -78,16 +99,19 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
                 LazyColumn {
                     items(repositories) { repository ->
                         RepositoryCard(repository) {
-                            // Navigate to RepoDetailsScreen with repository name
-                            navController.navigate("repoDetails/${repository.name}/${repository.owner.login}")
+                            if (networkUtils.isNetworkAvailable()) {
+                                navController.navigate("repoDetails/${repository.name}/${repository.owner.login}")
+                            } else {
+                                networkUtils.showNetworkAlertDialog(context)
+                            }
                         }
                     }
                 }
             }
-
         }
     }
 }
+
 @Composable
 fun RepositoryCard(repository: Repository, onClick: () -> Unit) {
     Card(
@@ -96,13 +120,13 @@ fun RepositoryCard(repository: Repository, onClick: () -> Unit) {
             .padding(8.dp)
             .clickable { onClick() }, // Make the whole card clickable
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface, // Background color
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Add elevation for shadow
-        shape = MaterialTheme.shapes.medium // Rounded corners
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(
-            modifier = Modifier.padding(16.dp) // Padding inside the card
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = repository.name,
@@ -112,7 +136,7 @@ fun RepositoryCard(repository: Repository, onClick: () -> Unit) {
                 color = Color.Black
             )
 
-            Spacer(modifier = Modifier.height(8.dp)) // Space between name and description
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = repository.description ?: "No description available",
@@ -122,7 +146,7 @@ fun RepositoryCard(repository: Repository, onClick: () -> Unit) {
                 color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(8.dp)) // Space between description and other text
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Language: ${repository.language ?: "N/A"}",

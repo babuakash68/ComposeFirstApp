@@ -11,7 +11,10 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("repositories")
-    suspend fun fetchAllRepositories(): Response<List<Repository>>
+    suspend fun fetchAllRepositories(
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
+    ): Response<List<Repository>>
 
     // Get details for a specific repository
     @GET("repos/{owner}/{repo}")
