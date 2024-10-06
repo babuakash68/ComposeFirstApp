@@ -16,27 +16,51 @@ class MainViewModel(private val repository: GitHubRepository) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
+    private var currentPage = 1
+    private var isLoadingNextPage = false
+    private var hasMoreData = true
 
     fun fetchUserRepositories() {
+        if (_isLoading.value || isLoadingNextPage || !hasMoreData) return // Avoid fetching if already loading or no more data
+
+        isLoadingNextPage = true
         viewModelScope.launch {
             _isLoading.value = true
-            val response = repository.getUserRepositories()
+            val response = repository.getUserRepositories(currentPage) // Fetch repositories based on the current page
             _isLoading.value = false
 
             if (response.isSuccessful) {
-                _repositories.value = response.body() ?: emptyList()
+                val newRepos = response.body() ?: emptyList()
+                if (newRepos.isEmpty()) {
+                    hasMoreData = false // No more data to load
+                } else {
+                    _repositories.value += newRepos // Append new repositories to the existing list
+                    currentPage++ // Increment the page number
+                }
             } else {
                 _repositories.value = emptyList()
             }
+
+            isLoadingNextPage = false
         }
     }
 
-    fun searchRepositories(query: String, page: Int) {
+    fun searchRepositories(query: String) {
+        if (!hasMoreData || _isLoading.value) return // Prevent additional API calls if no more data
+
         viewModelScope.launch {
             _isLoading.value = true
-            val result = repository.searchRepositories(query, page)
+            val result = repository.searchRepositories(query, currentPage)
             _isLoading.value = false
-            _repositories.value = result
+
+            if (result.isNotEmpty()) {
+                _repositories.value = _repositories.value + result // Append new results to the existing list
+                currentPage++ // Increment page for the next fetch
+            }
+
+            if (result.size < 10) {
+                hasMoreData = false // If fewer than 10 items are returned, stop pagination
+            }
         }
     }
 
@@ -64,5 +88,10 @@ class MainViewModel(private val repository: GitHubRepository) : ViewModel() {
             }
         }
         return contributors
+    }
+    fun resetSearch() {
+        currentPage = 1
+        hasMoreData = true
+        _repositories.value = emptyList() // Clear previous results
     }
 }

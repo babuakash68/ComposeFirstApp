@@ -6,8 +6,8 @@ import retrofit2.Response
 
 class GitHubRepository(private val apiService: ApiService) {
 
-    suspend fun getUserRepositories(): Response<List<Repository>> {
-        return apiService.fetchAllRepositories()
+    suspend fun getUserRepositories(page: Int, perPage: Int = 10): Response<List<Repository>> {
+        return apiService.fetchAllRepositories(page, perPage)
     }
 
     // Fetch repository details from GitHub API
@@ -15,15 +15,14 @@ class GitHubRepository(private val apiService: ApiService) {
         return apiService.getRepositoryDetails(owner, repo)
     }
 
-    suspend fun searchRepositories(query: String, page: Int): List<Repository> {
-        val response = apiService.searchRepositories(query, page)
+    suspend fun searchRepositories(query: String, page: Int, perPage: Int = 10): List<Repository> {
+        val response = apiService.searchRepositories(query, page, perPage)
         if (response.isSuccessful) {
             response.body()?.items?.let { repositories ->
-//                dao.insertAll(repositories.take(15)) // Save first 15 items offline
-                return repositories
+                return repositories // Return the list of repositories
             }
         }
-        return emptyList()
+        return emptyList() // Return empty list if response fails
     }
 
     suspend fun getContributors(repoName: String, owner: String) =

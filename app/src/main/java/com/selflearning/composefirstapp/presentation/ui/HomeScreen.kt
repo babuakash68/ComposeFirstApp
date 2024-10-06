@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -27,9 +28,13 @@ import com.selflearning.composefirstapp.data.remote.models.Repository
 import com.selflearning.composefirstapp.presentation.viewmodels.MainViewModel
 
 import androidx.compose.material3.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +42,20 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
     var searchQuery by remember { mutableStateOf("") }
     val repositories by viewModel.repositories.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.size
+        }.collect { visibleItemsCount ->
+            println("Visible items count: $visibleItemsCount")
+            if (visibleItemsCount >= repositories.size && !isLoading && searchQuery.isNotEmpty()) {
+                println("Fetching next page for search query: $searchQuery")
+                viewModel.searchRepositories(searchQuery)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -49,7 +68,9 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
+        Column(modifier = Modifier
+            .padding(paddingValues)
+            .padding(16.dp)) {
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -57,13 +78,17 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
                 modifier = Modifier.fillMaxWidth()
             )
             Row(modifier = Modifier.padding(top = 8.dp)) {
-                Button(onClick = { viewModel.searchRepositories(searchQuery, 1) }) {
+                Button(onClick = {
+                    viewModel.searchRepositories(searchQuery)
+                    viewModel.resetSearch()
+                }) {
                     Text("Search")
                 }
                 Spacer(modifier = Modifier.width(8.dp)) // Add space between buttons
                 Button(
                     onClick = {
                         searchQuery = ""
+                        viewModel.resetSearch()
                         viewModel.fetchUserRepositories()
                     }
                 ) {
@@ -78,7 +103,6 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
                 LazyColumn {
                     items(repositories) { repository ->
                         RepositoryCard(repository) {
-                            // Navigate to RepoDetailsScreen with repository name
                             navController.navigate("repoDetails/${repository.name}/${repository.owner.login}")
                         }
                     }
@@ -88,6 +112,7 @@ fun HomeScreen(navController: NavHostController, viewModel: MainViewModel, userN
         }
     }
 }
+
 @Composable
 fun RepositoryCard(repository: Repository, onClick: () -> Unit) {
     Card(
@@ -122,7 +147,7 @@ fun RepositoryCard(repository: Repository, onClick: () -> Unit) {
                 color = Color.Gray
             )
 
-            Spacer(modifier = Modifier.height(8.dp)) // Space between description and other text
+            Spacer(modifier = Modifier.height(8.dp)) // Space between description
 
             Text(
                 text = "Language: ${repository.language ?: "N/A"}",
