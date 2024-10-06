@@ -67,31 +67,31 @@ class MainViewModel(private val repository: GitHubRepository) : ViewModel() {
     }
 
     fun getRepositoryDetails(repoName: String, owner: String) {
-        // Fetch only if not already loaded
-        if (_repositoryDetails.value == null) {
-            viewModelScope.launch {
-                _isLoading.value = true
-                val response = repository.getRepositoryDetails(owner, repoName)
-                if (response.isSuccessful) {
-                    _repositoryDetails.value = response.body()
-                }
-                _isLoading.value = false
+        viewModelScope.launch {
+            _isLoading.value = true
+            // Reset previous data
+            _repositoryDetails.value = null
+            val response = repository.getRepositoryDetails(owner, repoName)
+            if (response.isSuccessful) {
+                _repositoryDetails.value = response.body()
             }
+            _isLoading.value = false
         }
     }
 
     fun getContributors(repoName: String, owner: String) {
-        if (_contributors.value.isEmpty()) {
-            viewModelScope.launch {
-                _isLoading.value = true
-                val response = repository.getContributors(repoName, owner)
-                if (response.isSuccessful) {
-                    _contributors.value = response.body() ?: emptyList()
-                }
-                _isLoading.value = false
+        viewModelScope.launch {
+            _isLoading.value = true
+            // Reset previous contributors
+            _contributors.value = emptyList()
+            val response = repository.getContributors(repoName, owner)
+            if (response.isSuccessful) {
+                _contributors.value = response.body() ?: emptyList()
             }
+            _isLoading.value = false
         }
     }
+
 
     fun resetSearch() {
         currentPage = 1
