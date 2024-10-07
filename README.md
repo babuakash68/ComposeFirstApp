@@ -42,4 +42,4 @@ The project follows Clean Architecture, with separation of concerns into differe
 
 1. Clone this repository:
    ```bash
- [https://github.com/babuakash68/ComposeFirstApp.git]
+   git clone [https://github.com/your-babuakash68/github-repo-search.git](https://github.com/babuakash68/ComposeFirstApp.git)
