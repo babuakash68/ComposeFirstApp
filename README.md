@@ -42,4 +42,16 @@ The project follows Clean Architecture, with separation of concerns into differe
 
 1. Clone this repository:
    ```bash
-   git clone [https://github.com/your-babuakash68/github-repo-search.git](https://github.com/babuakash68/ComposeFirstApp.git)
+   git clone https://github.com/babuakash68/ComposeFirstApp.git
+2. Before running the project, ensure you have set up the required GitHub API Token as an environment variable to avoid hardcoding sensitive information in the code.
+
+## Setting the GitHub API Token (Required)
+
+The project uses an environment variable for the GitHub API token to securely authenticate API requests. Follow the steps below to set the token on your local environment:
+
+- **Update Token:**
+  - Set the GITHUB_TOKEN variable.
+  - Navigates to the  package com.selflearning.composefirstapp.data.remote
+  - Update Your TOKEN.
+
+
